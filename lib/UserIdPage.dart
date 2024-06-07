@@ -10,25 +10,27 @@ class UserIdPage extends StatefulWidget {
 
 class _UserIdPageState extends State<UserIdPage> {
   final TextEditingController _userIdController = TextEditingController();
+  final TextEditingController _roomIdController = TextEditingController(); // Ajouter un nouveau TextEditingController pour roomId
   final _uuid = Uuid();
   final _firestore = FirebaseFirestore.instance;
 
   @override
   void dispose() {
     _userIdController.dispose();
+    _roomIdController.dispose();
     super.dispose();
   }
 
-  Future<bool> userExists(String userId) async {
-    final userSnapshot = await _firestore.collection('users').doc(userId).get();
-    return userSnapshot.exists;
+  Future<bool> roomExists(String roomId) async {
+    final roomSnapshot = await _firestore.collection('conversations').doc(roomId).get();
+    return roomSnapshot.exists;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Enter User ID'),
+        title: Text('Enter User ID and Room ID'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -37,40 +39,33 @@ class _UserIdPageState extends State<UserIdPage> {
             TextField(
               controller: _userIdController,
               decoration: InputDecoration(
-                labelText: 'Enter your old User ID',
+                labelText: 'Enter your User ID',
+              ),
+            ),
+            TextField(
+              controller: _roomIdController,
+              decoration: InputDecoration(
+                labelText: 'Enter your Room ID',
               ),
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
-              child: Text('Start Discussion'),
+              child: Text('Suivi de réclamation'),
               onPressed: () async {
-                String userId = _userIdController.text;
-                if (await userExists(userId)) {
+                String roomId = _roomIdController.text;
+                String userId = _userIdController.text; // Utilisez l'ID de l'utilisateur entré
+                if (await roomExists(roomId)) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ChatRoom(userId: userId),
+                      builder: (context) => ChatRoom(userId: userId, roomId: roomId), // Pass userId and roomId to ChatRoom
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('User ID does not exist')),
+                    SnackBar(content: Text('Room ID does not exist')),
                   );
                 }
-              },
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              child: Text('New User'),
-              onPressed: () {
-                String newUserId = _uuid.v4();
-                _firestore.collection('users').doc(newUserId).set({});
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatRoom(userId: newUserId),
-                  ),
-                );
               },
             ),
           ],

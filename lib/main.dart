@@ -16,7 +16,7 @@ void main() async {
 }
 
 final routes = {
-  '/ChatRoom': (context) => const ChatRoom(userId: 'default'), // Add a default userId
+  '/ChatRoom': (context) => const ChatRoom(userId: 'default', roomId: 'default'), // Add a default roomId
   '/Home': (context) => const Home(),
   '/IdPage': (context) => UserIdPage(),
 };
