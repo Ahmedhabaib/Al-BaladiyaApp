@@ -4,6 +4,7 @@ import 'package:albaladiya/chatroom.dart';
 import 'package:albaladiya/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
 import 'reclamation.dart'; // Importer la page de réclamation
 
 void main() async {
@@ -17,7 +18,7 @@ void main() async {
 final routes = {
   '/ChatRoom': (context) => const ChatRoom(userId: 'default'), // Add a default userId
   '/Home': (context) => const Home(),
-  '/IdPage': (context) => UserIdPage(), // Remove the const keyword
+  '/IdPage': (context) => UserIdPage(),
 };
 
 class ReclamationApp extends StatelessWidget {

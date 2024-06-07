@@ -19,7 +19,26 @@ class _ChatRoomState extends State<ChatRoom> {
   final TextEditingController _messageController = TextEditingController();
   late User anonymousUser;
   late String userId;
+  late String otherUserId;
   String? messageText;
+
+  void createConversation(String otherUserId, String messageText) {
+    // Generate a unique ID for the conversation
+    var uuid = Uuid();
+    String conversationId = uuid.v1();
+
+    // Add the conversation to the current user's conversations
+    _firestore.collection('users').doc(userId).collection('conversations').doc(conversationId).set({
+      'otherUserId': otherUserId,
+    });
+
+    // Add the message to the conversation
+    _firestore.collection('users').doc(userId).collection('conversations').doc(conversationId).collection('messages').add({
+      'text': messageText,
+      'sender': userId,
+      'time': FieldValue.serverTimestamp(),
+    });
+  }
 
   void _logout() {
     // Add logout logic here
@@ -38,16 +57,21 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   void messagesStream() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
+    await for (var snapshot in _firestore.collection('users').doc(userId).collection('conversations').doc(otherUserId).collection('messages').orderBy('time').snapshots()) {
       for (var message in snapshot.docs) {
         print(message.data());
-        final currentuser = userId;
-
-        if (currentuser == userId) {
-          print('This is me!');
-        }
       }
     }
+  }
+
+  void sendMessage(String messageText) {
+    _firestore.collection('users').doc(userId).collection('conversations').doc(otherUserId).collection('messages').add({
+      'text': messageText,
+      'sender': userId,
+      'time': FieldValue.serverTimestamp(),
+    });
+    _messageController.clear(); // Clear the message field after sending
+    print('Send button pressed');
   }
 
   @override
