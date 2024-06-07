@@ -2,13 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 final _firestore = FirebaseFirestore.instance;
 
 class ChatRoom extends StatefulWidget {
   final String userId;
   final String roomId;
-  const ChatRoom({required this.userId, required this.roomId, Key? key}) : super(key: key);
+
+  const ChatRoom({required this.userId, required this.roomId, Key? key})
+      : super(key: key);
 
   @override
   _ChatRoomState createState() => _ChatRoomState();
@@ -33,7 +38,11 @@ class _ChatRoomState extends State<ChatRoom> {
   }
 
   void sendMessage(String messageText) {
-    _firestore.collection('conversations').doc(widget.roomId).collection('messages').add({
+    _firestore
+        .collection('conversations')
+        .doc(widget.roomId)
+        .collection('messages')
+        .add({
       'text': messageText,
       'sender': userId,
       'time': FieldValue.serverTimestamp(),
@@ -56,7 +65,9 @@ class _ChatRoomState extends State<ChatRoom> {
                 text: TextSpan(
                   style: Theme.of(context).textTheme.bodyText1,
                   children: [
-                    TextSpan(text: 'Sauvegarder votre ID pour suivre votre réclamation:\n\n'),
+                    TextSpan(
+                        text:
+                            'Sauvegarder votre ID pour suivre votre réclamation:\n\n'),
                     TextSpan(
                       text: 'Room ID: ',
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -77,6 +88,15 @@ class _ChatRoomState extends State<ChatRoom> {
                 ),
               ),
               actions: <Widget>[
+                TextButton(
+                  child: Text('Download PDF'),
+                  onPressed: () async {
+                    final pdf = await generatePdf(widget.roomId, widget.userId);
+                    await Printing.layoutPdf(
+                      onLayout: (PdfPageFormat format) async => pdf.save(),
+                    );
+                  },
+                ),
                 TextButton(
                   child: Text('OK'),
                   onPressed: () {
@@ -115,7 +135,8 @@ class _ChatRoomState extends State<ChatRoom> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              MessageStreamBuilder(roomId: widget.roomId, currentUserId: userId),
+              MessageStreamBuilder(
+                  roomId: widget.roomId, currentUserId: userId),
               Container(
                 decoration: BoxDecoration(
                   border: Border(
@@ -147,7 +168,8 @@ class _ChatRoomState extends State<ChatRoom> {
                     IconButton(
                       icon: Icon(Icons.attach_file),
                       onPressed: () async {
-                        FilePickerResult? result = await FilePicker.platform.pickFiles();
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles();
                         if (result != null) {
                           PlatformFile file = result.files.first;
                           _controller.text = file.name;
@@ -177,8 +199,11 @@ class _ChatRoomState extends State<ChatRoom> {
     );
   }
 }
+
 class MessageStreamBuilder extends StatelessWidget {
-  const MessageStreamBuilder({required this.roomId, required this.currentUserId, Key? key}) : super(key: key);
+  const MessageStreamBuilder(
+      {required this.roomId, required this.currentUserId, Key? key})
+      : super(key: key);
 
   final String roomId;
   final String currentUserId;
@@ -186,7 +211,12 @@ class MessageStreamBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('conversations').doc(roomId).collection('messages').orderBy('time').snapshots(),
+      stream: _firestore
+          .collection('conversations')
+          .doc(roomId)
+          .collection('messages')
+          .orderBy('time')
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
@@ -225,7 +255,8 @@ class MessageStreamBuilder extends StatelessWidget {
 }
 
 class MessageLine extends StatelessWidget {
-  const MessageLine({this.text, this.sender, required this.isMe, Key? key}) : super(key: key);
+  const MessageLine({this.text, this.sender, required this.isMe, Key? key})
+      : super(key: key);
 
   final String? sender;
   final String? text;
@@ -236,7 +267,8 @@ class MessageLine extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
             '$sender:',
@@ -246,15 +278,15 @@ class MessageLine extends StatelessWidget {
             elevation: 5,
             borderRadius: isMe
                 ? BorderRadius.only(
-              topLeft: Radius.circular(30),
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
-            )
+                    topLeft: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  )
                 : BorderRadius.only(
-              topRight: Radius.circular(30),
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
-            ),
+                    topRight: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
             color: isMe ? Colors.blue[800] : Colors.grey[800],
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -268,4 +300,28 @@ class MessageLine extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<pw.Document> generatePdf(String roomId, String userId) async {
+  final pdf = pw.Document();
+
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) => pw.Center(
+        child: pw.Column(
+          children: [
+            pw.Text('Room ID: $roomId',
+                style:
+                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 20),
+            pw.Text('User ID: $userId',
+                style:
+                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  return pdf;
 }
