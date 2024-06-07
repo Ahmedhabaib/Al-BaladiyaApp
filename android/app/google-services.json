@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1092108822444",
+    "project_id": "albaladiya-3c839",
+    "storage_bucket": "albaladiya-3c839.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092108822444:android:b31485d6290545f34ebc09",
+        "android_client_info": {
+          "package_name": "com.example.albaladiya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnCtMl3b2q0-BrewR5hzZQNvrm9pxFuIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
