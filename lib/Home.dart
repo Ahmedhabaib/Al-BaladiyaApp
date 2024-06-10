@@ -38,24 +38,18 @@ class _Home extends State<Home> {
             ),
             SizedBox(height: 30),
             MyButton(
-              color: Colors.yellow[900]!,
-              title: 'Sign in',
-              onPressed: () {
-                print('Sign in button pressed');
-              },
-            ),
-            MyButton(
               color: Colors.blue[800]!,
-              title: 'Register',
-              onPressed: () {
-                print('Register button pressed');
-              },
-            ),
-            MyButton(
-              color: Colors.purpleAccent[700]!,
-              title: 'Anonymous',
+              title: 'Espace Client',
               onPressed: () {
                 Navigator.pushNamed(context, '/IdPage');
+              },
+            ),
+            MyButton(
+              color: Colors.yellow[900]!,
+              title: 'Espace Admin',
+              onPressed: () {
+                Navigator.pushNamed(context, '/Login');
+                print('Sign in button pressed');
               },
             ),
           ],

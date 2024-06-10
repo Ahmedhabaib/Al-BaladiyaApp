@@ -1,135 +1,91 @@
-import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:albaladiya/chatroom.dart';
 
-void main() {
-  runApp(ReclamationApp());
-}
-
-class ReclamationApp extends StatelessWidget {
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Réclamation App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: ReclamationPage(),
-    );
-  }
-}
-
-class ReclamationPage extends StatefulWidget {
-  @override
-  _ReclamationPageState createState() => _ReclamationPageState();
-}
-
-class _ReclamationPageState extends State<ReclamationPage> {
-  List<Widget> _attachments = [];
-  String? _fileName;
-  PlatformFile? pickedFile;
-  bool isLoading = false;
-
-  void _addAttachment() {
-    setState(() {
-      if (_attachments.length < 10) {
-        _attachments.add(Text('Attachment ${_attachments.length + 1}'));
-      }
-    });
-  }
-
-  void pickFile(BuildContext context) async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: true,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        setState(() {
-          _fileName = result.files.first.name;
-          pickedFile = result.files.first;
-          // Do not convert the path to a string, as it's already a string
-          var fileToDisplay = File(pickedFile!.path!);
-        });
-
-        print('File name: $_fileName');
-      } else {
-        print('Aucun fichier sélectionné.');
-      }
-    } catch (e) {
-      print('Erreur lors de la récupération du fichier: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur lors de la récupération du fichier.'),
-        ),
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+class ReclamationPage extends StatelessWidget {
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Faire une Réclamation'),
+        title: Text('Réclamations'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await _auth.signOut();
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          ),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Objet',
-              ),
+            Container(
+              height: 180,
+              child: Image.asset('images/albaladiya.png'),
             ),
-            SizedBox(height: 16.0),
-            Expanded(
-              child: TextFormField(
-                maxLines: null,
-                decoration: InputDecoration(
-                  labelText: 'Corps de la Réclamation',
-                ),
-              ),
-            ),
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Pièces jointes:'),
-                IconButton(
-                  icon: Icon(Icons.attach_file),
-                  onPressed: () => pickFile(context),
-                ),
-              ],
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _attachments.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: _attachments[index],
+            SizedBox(height: 50),
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('conversations').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
                   );
-                },
-              ),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                // Envoyer la réclamation
-                // Implémentez votre logique d'envoi ici
+                }
+
+                final conversations = snapshot.data!.docs;
+return SingleChildScrollView(
+  scrollDirection: Axis.horizontal,
+  child: DataTable(
+    columns: const <DataColumn>[
+      DataColumn(
+        label: Text(
+          'Conversation',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+      DataColumn(
+        label: Text(
+          'Details',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+    ],
+    rows: conversations.asMap().entries.map((entry) {
+      int index = entry.key;
+      var conversation = entry.value;
+      return DataRow(
+        cells: <DataCell>[
+          DataCell(Text('Conversation${index+1}')),
+          DataCell(ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatRoom(
+                    userId: 'yourUserId', // Remplacez par votre userId
+                    roomId: conversation.id,
+                  ),
+                ),
+              );
+            },
+            child: Text('Open'),
+          )),
+        ],
+      );
+    }).toList(),
+  ),
+);
               },
-              child: Text('Envoyer'),
             ),
           ],
         ),

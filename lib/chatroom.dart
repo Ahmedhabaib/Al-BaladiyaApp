@@ -264,29 +264,32 @@ class MessageLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ajout de la condition pour vérifier si 'sender' est le placeholder ou manquant
+    final displaySender = (sender == null || sender == 'yourUserId') ? 'ADMIN' : sender;
+
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         crossAxisAlignment:
-            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
-            '$sender:',
+            '$displaySender',  // Utilisation de 'displaySender' au lieu de 'sender'
             style: TextStyle(fontSize: 15, color: Colors.black45),
           ),
           Material(
             elevation: 5,
             borderRadius: isMe
                 ? BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  )
+              topLeft: Radius.circular(30),
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
+            )
                 : BorderRadius.only(
-                    topRight: Radius.circular(30),
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
+              topRight: Radius.circular(30),
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
+            ),
             color: isMe ? Colors.blue[800] : Colors.grey[800],
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -301,6 +304,7 @@ class MessageLine extends StatelessWidget {
     );
   }
 }
+
 
 Future<pw.Document> generatePdf(String roomId, String userId) async {
   final pdf = pw.Document();
