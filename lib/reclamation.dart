@@ -33,59 +33,77 @@ class ReclamationPage extends StatelessWidget {
               child: Image.asset('images/albaladiya.png'),
             ),
             SizedBox(height: 50),
-            StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('conversations').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('conversations').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                final conversations = snapshot.data!.docs;
-return SingleChildScrollView(
-  scrollDirection: Axis.horizontal,
-  child: DataTable(
-    columns: const <DataColumn>[
-      DataColumn(
-        label: Text(
-          'Conversation',
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-      DataColumn(
-        label: Text(
-          'Details',
-          style: TextStyle(fontStyle: FontStyle.italic),
-        ),
-      ),
-    ],
-    rows: conversations.asMap().entries.map((entry) {
-      int index = entry.key;
-      var conversation = entry.value;
-      return DataRow(
-        cells: <DataCell>[
-          DataCell(Text('Conversation${index+1}')),
-          DataCell(ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatRoom(
-                    userId: 'yourUserId', // Remplacez par votre userId
-                    roomId: conversation.id,
-                  ),
-                ),
-              );
-            },
-            child: Text('Open'),
-          )),
-        ],
-      );
-    }).toList(),
-  ),
-);
-              },
+                  final conversations = snapshot.data!.docs;
+                  return SingleChildScrollView(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columns: const <DataColumn>[
+                          DataColumn(
+                            label: Text(
+                              'Conversation',
+                              style: TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Actions',
+                              style: TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                        ],
+                        rows: conversations.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var conversation = entry.value;
+                          return DataRow(
+                            cells: <DataCell>[
+                              DataCell(Text('Conversation${index + 1}')),
+                              DataCell(Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatRoom(
+                                            userId: 'yourUserId', // Remplacez par votre userId
+                                            roomId: conversation.id,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Text('Open'),
+                                  ),
+                                  SizedBox(width: 10), // Add some space between the buttons
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await _firestore.collection('conversations').doc(conversation.id).delete();
+                                    },
+                                    child: Text('Delete',style: TextStyle(color: Colors.white)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red, // Set the color to red for delete button
+                                    ),
+                                  ),
+                                ],
+                              )),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

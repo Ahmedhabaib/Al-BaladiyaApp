@@ -43,12 +43,13 @@ class _UserIdPageState extends State<UserIdPage> {
         title: Text('Enter User ID and Room ID'),
       ),
       backgroundColor: Colors.white,
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SizedBox(height: 50), // Add some space at the top
             Container(
               height: 180,
               child: Image.asset('images/albaladiya.png'),
@@ -124,35 +125,35 @@ class _UserIdPageState extends State<UserIdPage> {
               ),
             ),
             SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 50), // Adjust the padding here
-          child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellow[900], // background
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow[900], // background
+                ),
+                child: Text(
+                  'Suivi de réclamation',
+                  style: TextStyle(color: Colors.white), // Set the text color here
+                ),
+                onPressed: () async {
+                  String roomId = _roomIdController.text;
+                  String userId = _userIdController.text;
+                  print('Checking room existence for Room ID: $roomId'); // Print roomId to debug
+                  if (await roomExists(roomId)) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatRoom(userId: userId, roomId: roomId), // Pass userId and roomId to ChatRoom
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Room ID does not exist')),
+                    );
+                  }
+                },
               ),
-              child: Text(
-                'Suivi de réclamation',
-                style: TextStyle(color: Colors.white), // Set the text color here
-              ),
-              onPressed: () async {
-                String roomId = _roomIdController.text;
-                String userId = _userIdController.text;
-                print('Checking room existence for Room ID: $roomId'); // Print roomId to debug
-                if (await roomExists(roomId)) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChatRoom(userId: userId, roomId: roomId), // Pass userId and roomId to ChatRoom
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Room ID does not exist')),
-                  );
-                }
-              },
             ),
-        ),
             SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -184,6 +185,7 @@ class _UserIdPageState extends State<UserIdPage> {
                 );
               },
             ),
+            SizedBox(height: 50), // Add some space at the bottom
           ],
         ),
       ),
