@@ -79,4 +79,4 @@ The application follows a **3-tier architecture**:
 This project is licensed under the MIT License.
 
 ## Documentation
-For more details, please refer to the **[Project Report](https://raw.githubusercontent.com/Ahmedhabaib/Setting-up-a-security-system/a7b254fac92aa9014936991c06e4a02143b3c5ac/Mise%20en%20place%20d%E2%80%99un%20syst%C3%A9me%20de%20s%C3%A9curit%C3%A9.pdf)**.
+For more details, please refer to the **[Project Report](https://raw.githubusercontent.com/Ahmedhabaib/Al-BaladiyaApp/3d8aa8e2d104e38cfc4520a866772a3a3db590d9/Application%20Mobile%20Flutter%20Al-Baladiya.pdf)**.
