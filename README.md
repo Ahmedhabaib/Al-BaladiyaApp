@@ -72,9 +72,8 @@ The application follows a **3-tier architecture**:
 - **Completion Date**: May 31, 2024
 - **Presentation Date**: June 11, 2024
 
-## Contributors
+## Contributor
 - **Ahmed HABAIB**
-- **Supervisors**: Wafa Naifar, Mohamed Koubaa, Wael Sellami
 
 ## License
 This project is licensed under the MIT License.
